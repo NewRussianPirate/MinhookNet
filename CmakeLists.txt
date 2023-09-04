@@ -1,0 +1,49 @@
+cmake_minimum_required(VERSION 3.26)
+set(CMAKE_CXX_STANDARD 17)
+
+project(MinhookNet)
+
+set(SRC
+src/AssemblyInfo.cpp
+src/FunctionHook.h
+src/FunctionHook.cpp
+src/Hook.h
+src/Hook.cpp
+src/MHStatus.h
+src/Minhook.h
+src/Minhook.cpp
+src/MinhookException.h
+src/MinhookException.cpp
+src/StringHelper.h
+src/MHNative.h
+src/MHNative.cpp)
+
+add_library(MinhookNet MODULE ${SRC})
+
+target_compile_options(MinhookNet PRIVATE /doc)
+
+set_target_properties(MinhookNet PROPERTIES VS_GLOBAL_TargetFramework "net5.0")
+
+#Different .dll names for x32/x64 output same as in vanila minhook
+if(WIN32)
+  set_target_properties(MinhookNet PROPERTIES PREFIX "")
+  if(CMAKE_SIZEOF_VOID_P EQUAL 8)   
+    set_target_properties(MinhookNet PROPERTIES DEBUG_POSTFIX ".x64d")
+    set_target_properties(MinhookNet PROPERTIES RELEASE_POSTFIX ".x64")
+  else()
+    set_target_properties(MinhookNet PROPERTIES DEBUG_POSTFIX ".x32d")
+    set_target_properties(MinhookNet PROPERTIES RELEASE_POSTFIX ".x32")
+  endif()
+else()
+  set_target_properties(MinhookNet PROPERTIES PREFIX "lib")
+  set_target_properties(MinhookNet PROPERTIES POSTFIX "")
+  set_target_properties(MinhookNet PROPERTIES DEBUG_POSTFIX "d")
+endif()
+
+set_target_properties(MinhookNet PROPERTIES COMMON_LANGUAGE_RUNTIME "netcore")
+
+target_include_directories(MinhookNet INTERFACE ${CMAKE_SOURCE_DIR}/dependencies/minhook/include)
+
+target_link_libraries(MinhookNet minhook)
+
+add_subdirectory(dependencies/minhook)
